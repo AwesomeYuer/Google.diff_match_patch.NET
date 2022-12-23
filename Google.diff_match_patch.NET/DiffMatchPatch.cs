@@ -229,7 +229,7 @@ namespace Google.DiffMatchPatch
         public short Patch_Margin = 4;
 
         // The number of bits in an int.
-        private short Match_MaxBits = 32;
+        private readonly short Match_MaxBits = 32;
 
 
         //  DIFF FUNCTIONS
@@ -470,7 +470,7 @@ namespace Google.DiffMatchPatch
                             List<Diff> subDiff =
                                 diff_main(text_delete, text_insert, false, deadline);
                             diffs.InsertRange(pointer, subDiff);
-                            pointer = pointer + subDiff.Count;
+                            pointer += subDiff.Count;
                         }
                         count_insert = 0;
                         count_delete = 0;
@@ -629,9 +629,11 @@ namespace Google.DiffMatchPatch
             }
             // Diff took too long and hit the deadline or
             // number of diffs equals number of characters, no commonality at all.
-            List<Diff> diffs = new ();
-            diffs.Add(new Diff(Operation.DELETE, text1));
-            diffs.Add(new Diff(Operation.INSERT, text2));
+            List<Diff> diffs = new()
+            {
+                new Diff(Operation.DELETE, text1),
+                new Diff(Operation.INSERT, text2)
+            };
             return diffs;
         }
 
@@ -944,12 +946,16 @@ namespace Google.DiffMatchPatch
                                                      shorttext[..j]);
                 if (best_common.Length < suffixLength + prefixLength)
                 {
-                    best_common = shorttext.Substring(j - suffixLength, suffixLength)
-                        + shorttext.Substring(j, prefixLength);
-                    best_longtext_a = longtext.Substring(0, i - suffixLength);
-                    best_longtext_b = longtext.Substring(i + prefixLength);
-                    best_shorttext_a = shorttext.Substring(0, j - suffixLength);
-                    best_shorttext_b = shorttext.Substring(j + prefixLength);
+                    best_common = string
+                                        .Concat
+                                            (
+                                                shorttext.AsSpan(j - suffixLength, suffixLength)
+                                                , shorttext.AsSpan(j, prefixLength)
+                                            );
+                    best_longtext_a = longtext[..(i - suffixLength)];
+                    best_longtext_b = longtext[(i + prefixLength)..];
+                    best_shorttext_a = shorttext[..(j - suffixLength)];
+                    best_shorttext_b = shorttext[(j + prefixLength)..];
                 }
             }
             if (best_common.Length * 2 >= longtext.Length)
@@ -1064,10 +1070,10 @@ namespace Google.DiffMatchPatch
                             // Overlap found.
                             // Insert an equality and trim the surrounding edits.
                             diffs.Insert(pointer, new Diff(Operation.EQUAL,
-                                insertion.Substring(0, overlap_length1)));
+                                insertion[..overlap_length1]));
                             diffs[pointer - 1].text =
-                                deletion.Substring(0, deletion.Length - overlap_length1);
-                            diffs[pointer + 1].text = insertion.Substring(overlap_length1);
+                                deletion[..^overlap_length1];
+                            diffs[pointer + 1].text = insertion[overlap_length1..];
                             pointer++;
                         }
                     }
@@ -1079,12 +1085,12 @@ namespace Google.DiffMatchPatch
                             // Reverse overlap found.
                             // Insert an equality and swap and trim the surrounding edits.
                             diffs.Insert(pointer, new Diff(Operation.EQUAL,
-                                deletion.Substring(0, overlap_length2)));
+                                deletion[..overlap_length2]));
                             diffs[pointer - 1].operation = Operation.INSERT;
                             diffs[pointer - 1].text =
-                                insertion.Substring(0, insertion.Length - overlap_length2);
+                                insertion[..^overlap_length2];
                             diffs[pointer + 1].operation = Operation.DELETE;
-                            diffs[pointer + 1].text = deletion.Substring(overlap_length2);
+                            diffs[pointer + 1].text = deletion[overlap_length2..];
                             pointer++;
                         }
                     }
@@ -1199,7 +1205,7 @@ namespace Google.DiffMatchPatch
             // 'whitespace'.  Since this function's purpose is largely cosmetic,
             // the choice has been made to use each language's native features
             // rather than force total conformity.
-            char char1 = one[one.Length - 1];
+            char char1 = one[^1];
             char char2 = two[0];
             bool nonAlphaNumeric1 = !Char.IsLetterOrDigit(char1);
             bool nonAlphaNumeric2 = !Char.IsLetterOrDigit(char2);
@@ -1239,8 +1245,8 @@ namespace Google.DiffMatchPatch
         }
 
         // Define some regex patterns for matching boundaries.
-        private Regex BLANKLINEEND = new ("\\n\\r?\\n\\Z");
-        private Regex BLANKLINESTART = new ("\\A\\r?\\n\\r?\\n");
+        private readonly Regex BLANKLINEEND = new ("\\n\\r?\\n\\Z");
+        private readonly Regex BLANKLINESTART = new ("\\A\\r?\\n\\r?\\n");
 
         /**
          * Reduce the number of edits by eliminating operationally trivial
@@ -1251,7 +1257,7 @@ namespace Google.DiffMatchPatch
         {
             bool changes = false;
             // Stack of indices where equalities are found.
-            Stack<int> equalities = new Stack<int>();
+            Stack<int> equalities = new ();
             // Always equal to equalities[equalitiesLength-1][1]
             string lastEquality = string.Empty;
             int pointer = 0;  // Index of current position.
@@ -1547,7 +1553,7 @@ namespace Google.DiffMatchPatch
          */
         public string diff_prettyHtml(List<Diff> diffs)
         {
-            StringBuilder html = new StringBuilder();
+            StringBuilder html = new ();
             foreach (Diff aDiff in diffs)
             {
                 string text = aDiff.text.Replace("&", "&amp;").Replace("<", "&lt;")
@@ -1577,7 +1583,7 @@ namespace Google.DiffMatchPatch
          */
         public string diff_text1(List<Diff> diffs)
         {
-            StringBuilder text = new StringBuilder();
+            StringBuilder text = new ();
             foreach (Diff aDiff in diffs)
             {
                 if (aDiff.operation != Operation.INSERT)
@@ -1595,7 +1601,7 @@ namespace Google.DiffMatchPatch
          */
         public string diff_text2(List<Diff> diffs)
         {
-            StringBuilder text = new StringBuilder();
+            StringBuilder text = new ();
             foreach (Diff aDiff in diffs)
             {
                 if (aDiff.operation != Operation.DELETE)
@@ -1650,7 +1656,7 @@ namespace Google.DiffMatchPatch
          */
         public string diff_toDelta(List<Diff> diffs)
         {
-            StringBuilder text = new StringBuilder();
+            StringBuilder text = new ();
             foreach (Diff aDiff in diffs)
             {
                 switch (aDiff.operation)
@@ -1685,7 +1691,7 @@ namespace Google.DiffMatchPatch
          */
         public List<Diff> diff_fromDelta(string text1, string delta)
         {
-            List<Diff> diffs = new List<Diff>();
+            List<Diff> diffs = new ();
             int pointer = 0;  // Cursor in text1
             string[] tokens = delta.Split(new string[] { "\t" },
                 StringSplitOptions.None);
@@ -1962,7 +1968,7 @@ namespace Google.DiffMatchPatch
          */
         protected Dictionary<char, int> match_alphabet(string pattern)
         {
-            Dictionary<char, int> s = new Dictionary<char, int>();
+            Dictionary<char, int> s = new ();
             char[] char_pattern = pattern.ToCharArray();
             foreach (char c in char_pattern)
             {
@@ -2095,12 +2101,12 @@ namespace Google.DiffMatchPatch
         public List<Patch> patch_make(string text1, List<Diff> diffs)
         {
             // Check for null inputs not needed since null can't be passed in C#.
-            List<Patch> patches = new List<Patch>();
+            List<Patch> patches = new ();
             if (diffs.Count == 0)
             {
                 return patches;  // Get rid of the null case.
             }
-            Patch patch = new Patch();
+            Patch patch = new ();
             int char_count1 = 0;  // Number of characters into the text1 string.
             int char_count2 = 0;  // Number of characters into the text2 string.
                                   // Start with text1 (prepatch_text) and apply the diffs until we arrive at
@@ -2186,13 +2192,13 @@ namespace Google.DiffMatchPatch
          */
         public List<Patch> patch_deepCopy(List<Patch> patches)
         {
-            List<Patch> patchesCopy = new List<Patch>();
+            List<Patch> patchesCopy = new ();
             foreach (Patch aPatch in patches)
             {
-                Patch patchCopy = new Patch();
+                Patch patchCopy = new ();
                 foreach (Diff aDiff in aPatch.diffs)
                 {
-                    Diff diffCopy = new Diff(aDiff.operation, aDiff.text);
+                    Diff diffCopy = new (aDiff.operation, aDiff.text);
                     patchCopy.diffs.Add(diffCopy);
                 }
                 patchCopy.start1 = aPatch.start1;
@@ -2542,7 +2548,7 @@ namespace Google.DiffMatchPatch
          */
         public string patch_toText(List<Patch> patches)
         {
-            StringBuilder text = new StringBuilder();
+            StringBuilder text = new ();
             foreach (Patch aPatch in patches)
             {
                 text.Append(aPatch);
