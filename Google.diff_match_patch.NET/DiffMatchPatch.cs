@@ -2329,8 +2329,11 @@ namespace DiffMatchPatch
                     case Operation.DELETE:
                         patch.length1 += aDiff.text.Length;
                         patch.diffs.Add(aDiff);
-                        postpatch_text = postpatch_text.Remove(char_count2,
-                            aDiff.text.Length);
+                        postpatch_text = postpatch_text.Remove
+                                                            (
+                                                                char_count2
+                                                                , aDiff.text.Length
+                                                            );
                         break;
                     case Operation.EQUAL:
                         if (aDiff.text.Length <= 2 * Patch_Margin
