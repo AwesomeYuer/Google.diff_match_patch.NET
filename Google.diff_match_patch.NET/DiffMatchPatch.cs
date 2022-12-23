@@ -41,7 +41,7 @@ namespace Google.DiffMatchPatch
         // Java substring function
         public static string JavaSubstring(this string s, int begin, int end)
         {
-            return s.Substring(begin, end - begin);
+            return s[begin..end];
         }
     }
 
@@ -103,8 +103,7 @@ namespace Google.DiffMatchPatch
             }
 
             // If parameter cannot be cast to Diff return false.
-            var p = @object as Diff;
-            if (p == null)
+            if (@object is not Diff p)
             {
                 return false;
             }
@@ -137,7 +136,7 @@ namespace Google.DiffMatchPatch
      */
     public class Patch
     {
-        public List<Diff> diffs = new List<Diff>();
+        public List<Diff> diffs = new ();
         public int start1;
         public int start2;
         public int length1;
@@ -176,7 +175,7 @@ namespace Google.DiffMatchPatch
             {
                 coords2 = (start2 + 1) + "," + length2;
             }
-            StringBuilder text = new StringBuilder();
+            StringBuilder text = new ();
             text.Append("@@ -").Append(coords1).Append(" +").Append(coords2)
                 .Append(" @@\n");
             // Escape the body of the patch with %xx notation.
@@ -307,15 +306,15 @@ namespace Google.DiffMatchPatch
 
             // Trim off common prefix (speedup).
             int commonlength = diff_commonPrefix(text1, text2);
-            string commonprefix = text1.Substring(0, commonlength);
-            text1 = text1.Substring(commonlength);
-            text2 = text2.Substring(commonlength);
+            string commonprefix = text1[..commonlength];
+            text1 = text1[commonlength..];
+            text2 = text2[commonlength..];
 
             // Trim off common suffix (speedup).
             commonlength = diff_commonSuffix(text1, text2);
-            string commonsuffix = text1.Substring(text1.Length - commonlength);
-            text1 = text1.Substring(0, text1.Length - commonlength);
-            text2 = text2.Substring(0, text2.Length - commonlength);
+            string commonsuffix = text1[^commonlength..];
+            text1 = text1[..^commonlength];
+            text2 = text2[..^commonlength];
 
             // Compute the diff on the middle block.
             diffs = diff_compute(text1, text2, checklines, deadline);
@@ -348,7 +347,7 @@ namespace Google.DiffMatchPatch
         private List<Diff> diff_compute(string text1, string text2,
                                         bool checklines, DateTime deadline)
         {
-            List<Diff> diffs = new List<Diff>();
+            List<Diff> diffs = new ();
 
             if (text1.Length == 0)
             {
@@ -372,9 +371,9 @@ namespace Google.DiffMatchPatch
                 // Shorter text is inside the longer text (speedup).
                 Operation op = (text1.Length > text2.Length) ?
                     Operation.DELETE : Operation.INSERT;
-                diffs.Add(new Diff(op, longtext.Substring(0, i)));
+                diffs.Add(new Diff(op, longtext[..i]));
                 diffs.Add(new Diff(Operation.EQUAL, shorttext));
-                diffs.Add(new Diff(op, longtext.Substring(i + shorttext.Length)));
+                diffs.Add(new Diff(op, longtext[(i + shorttext.Length)..]));
                 return diffs;
             }
 
@@ -630,7 +629,7 @@ namespace Google.DiffMatchPatch
             }
             // Diff took too long and hit the deadline or
             // number of diffs equals number of characters, no commonality at all.
-            List<Diff> diffs = new List<Diff>();
+            List<Diff> diffs = new ();
             diffs.Add(new Diff(Operation.DELETE, text1));
             diffs.Add(new Diff(Operation.INSERT, text2));
             return diffs;
@@ -649,10 +648,10 @@ namespace Google.DiffMatchPatch
         private List<Diff> diff_bisectSplit(string text1, string text2,
             int x, int y, DateTime deadline)
         {
-            string text1a = text1.Substring(0, x);
-            string text2a = text2.Substring(0, y);
-            string text1b = text1.Substring(x);
-            string text2b = text2.Substring(y);
+            string text1a = text1[..x];
+            string text2a = text2[..y];
+            string text1b = text1[x..];
+            string text2b = text2[y..];
 
             // Compute both diffs serially.
             List<Diff> diffs = diff_main(text1a, text2a, false, deadline);
@@ -671,10 +670,10 @@ namespace Google.DiffMatchPatch
          *     encoded text2 and the List of unique strings.  The zeroth element
          *     of the List of unique strings is intentionally blank.
          */
-        protected Object[] diff_linesToChars(string text1, string text2)
+        protected object[] diff_linesToChars(string text1, string text2)
         {
-            List<string> lineArray = new List<string>();
-            Dictionary<string, int> lineHash = new Dictionary<string, int>();
+            List<string> lineArray = new ();
+            Dictionary<string, int> lineHash = new ();
             // e.g. linearray[4] == "Hello\n"
             // e.g. linehash.get("Hello\n") == 4
 
@@ -685,7 +684,7 @@ namespace Google.DiffMatchPatch
             // Allocate 2/3rds of the space for text1, the rest for text2.
             string chars1 = diff_linesToCharsMunge(text1, lineArray, lineHash, 40000);
             string chars2 = diff_linesToCharsMunge(text2, lineArray, lineHash, 65535);
-            return new Object[] { chars1, chars2, lineArray };
+            return new object[] { chars1, chars2, lineArray };
         }
 
         /**
@@ -703,7 +702,7 @@ namespace Google.DiffMatchPatch
             int lineStart = 0;
             int lineEnd = -1;
             string line;
-            StringBuilder chars = new StringBuilder();
+            StringBuilder chars = new ();
             // Walk the text, pulling out a Substring for each line.
             // text.split('\n') would would temporarily double our memory footprint.
             // Modifying text would create many large strings to garbage collect.
@@ -725,7 +724,7 @@ namespace Google.DiffMatchPatch
                     if (lineArray.Count == maxLines)
                     {
                         // Bail out at 65535 because char 65536 == char 0.
-                        line = text.Substring(lineStart);
+                        line = text[lineStart..];
                         lineEnd = text.Length;
                     }
                     lineArray.Add(line);
@@ -820,11 +819,11 @@ namespace Google.DiffMatchPatch
             // Truncate the longer string.
             if (text1_length > text2_length)
             {
-                text1 = text1.Substring(text1_length - text2_length);
+                text1 = text1[(text1_length - text2_length)..];
             }
             else if (text1_length < text2_length)
             {
-                text2 = text2.Substring(0, text1_length);
+                text2 = text2[..text1_length];
             }
             int text_length = Math.Min(text1_length, text2_length);
             // Quick check for the worst case.
@@ -840,15 +839,15 @@ namespace Google.DiffMatchPatch
             int length = 1;
             while (true)
             {
-                string pattern = text1.Substring(text_length - length);
+                string pattern = text1[(text_length - length)..];
                 int found = text2.IndexOf(pattern, StringComparison.Ordinal);
                 if (found == -1)
                 {
                     return best;
                 }
                 length += found;
-                if (found == 0 || text1.Substring(text_length - length) ==
-                    text2.Substring(0, length))
+                if (found == 0 || text1[(text_length - length)..] ==
+                    text2[..length])
                 {
                     best = length;
                     length++;
@@ -939,10 +938,10 @@ namespace Google.DiffMatchPatch
             while (j < shorttext.Length && (j = shorttext.IndexOf(seed, j + 1,
                 StringComparison.Ordinal)) != -1)
             {
-                int prefixLength = diff_commonPrefix(longtext.Substring(i),
-                                                     shorttext.Substring(j));
-                int suffixLength = diff_commonSuffix(longtext.Substring(0, i),
-                                                     shorttext.Substring(0, j));
+                int prefixLength = diff_commonPrefix(longtext[i..],
+                                                     shorttext[j..]);
+                int suffixLength = diff_commonSuffix(longtext[..i],
+                                                     shorttext[..j]);
                 if (best_common.Length < suffixLength + prefixLength)
                 {
                     best_common = shorttext.Substring(j - suffixLength, suffixLength)
@@ -973,7 +972,7 @@ namespace Google.DiffMatchPatch
         {
             bool changes = false;
             // Stack of indices where equalities are found.
-            Stack<int> equalities = new Stack<int>();
+            Stack<int> equalities = new ();
             // Always equal to equalities[equalitiesLength-1][1]
             string lastEquality = null!;
             int pointer = 0;  // Index of current position.
@@ -1240,8 +1239,8 @@ namespace Google.DiffMatchPatch
         }
 
         // Define some regex patterns for matching boundaries.
-        private Regex BLANKLINEEND = new Regex("\\n\\r?\\n\\Z");
-        private Regex BLANKLINESTART = new Regex("\\A\\r?\\n\\r?\\n");
+        private Regex BLANKLINEEND = new ("\\n\\r?\\n\\Z");
+        private Regex BLANKLINESTART = new ("\\A\\r?\\n\\r?\\n");
 
         /**
          * Reduce the number of edits by eliminating operationally trivial
