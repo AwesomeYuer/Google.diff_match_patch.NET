@@ -304,8 +304,13 @@ namespace DiffMatchPatch
          *     instead.
          * @return List of Diff objects.
          */
-        private List<Diff> diff_main(string text1, string text2, bool checklines,
-            DateTime deadline)
+        private List<Diff> diff_main
+                                    (
+                                        string text1
+                                        , string text2
+                                        , bool checklines
+                                        , DateTime deadline
+                                    )
         {
             // Check for null inputs not needed since null can't be passed in C#.
 
@@ -2336,8 +2341,14 @@ namespace DiffMatchPatch
                                                             );
                         break;
                     case Operation.EQUAL:
-                        if (aDiff.text.Length <= 2 * Patch_Margin
-                            && patch.diffs.Count() != 0 && aDiff != diffs.Last())
+                        if
+                            (
+                                aDiff.text.Length <= 2 * Patch_Margin
+                                &&
+                                patch.diffs.Count() != 0
+                                &&
+                                aDiff != diffs.Last()
+                            )
                         {
                             // Small equality inside a patch.
                             patch.diffs.Add(aDiff);
@@ -2522,7 +2533,7 @@ namespace DiffMatchPatch
                             (
                                 text1.Length > Match_MaxBits
                                 &&
-                                diff_levenshtein(diffs) / (float)text1.Length > Patch_DeleteThreshold
+                                diff_levenshtein(diffs) / (float) text1.Length > Patch_DeleteThreshold
                             )
                         {
                             // The end points match, but the content is unacceptably bad.
@@ -2606,7 +2617,12 @@ namespace DiffMatchPatch
             // Add some padding on start of first diff.
             Patch patch = patches.First();
             List<Diff> diffs = patch.diffs;
-            if (diffs.Count == 0 || diffs.First().operation != Operation.EQUAL)
+            if 
+                (
+                    diffs.Count == 0
+                    ||
+                    diffs.First().operation != Operation.EQUAL
+                )
             {
                 // Add nullPadding equality.
                 diffs.Insert(0, new Diff(Operation.EQUAL, nullPadding));
@@ -2631,7 +2647,12 @@ namespace DiffMatchPatch
             // Add some padding on end of last diff.
             patch = patches.Last();
             diffs = patch.diffs;
-            if (diffs.Count == 0 || diffs.Last().operation != Operation.EQUAL)
+            if 
+                (
+                    diffs.Count == 0
+                    ||
+                    diffs.Last().operation != Operation.EQUAL
+                )
             {
                 // Add nullPadding equality.
                 diffs.Add(new Diff(Operation.EQUAL, nullPadding));

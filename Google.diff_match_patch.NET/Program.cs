@@ -3,28 +3,35 @@
 // Create a new diff-match-patch object
 var dmp = new diff_match_patch();
 
+var one = """
+That is the new string!
+This is the old string
+""";
+var two = """
+This is the old string
+That is the new string!
+""";
+
 // Compare the two strings and get a list of diffs
 var diffs = dmp
                 .diff_main
                         (
-                            "This is the old string"
-                            , "That is the new string!"
+                            one
+                            , two
+                            , true
                         );
-
 // Iterate through the list of diffs and print out the details
+var i = 0;
 foreach (var diff in diffs)
 {
-    if (diff.operation == Operation.INSERT)
-    {
-        Console.WriteLine("Insert: " + diff.text);
-    }
-    else if (diff.operation == Operation.DELETE)
-    {
-        Console.WriteLine("Delete: " + diff.text);
-    }
-    else if (diff.operation == Operation.EQUAL)
-    {
-        Console.WriteLine("Equal: " + diff.text);
-    }
+    i++;
+    Console.WriteLine($"{i}:\r\n{diff.operation}: {diff.text}");
 }
 
+var patches = dmp.patch_make(one, two);
+i = 0;
+foreach (var patch in patches)
+{
+    i++;
+    Console.WriteLine($"{i}:\r\n{patch}");
+}
