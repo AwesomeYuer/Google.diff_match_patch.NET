@@ -1,4 +1,4 @@
-﻿using DiffMatchPatch;
+﻿using Google.DiffMatchPatch;
 
 // Create a new diff-match-patch object
 var dmp = new diff_match_patch();
