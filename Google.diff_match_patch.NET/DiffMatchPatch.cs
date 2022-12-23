@@ -427,7 +427,7 @@ namespace Google.DiffMatchPatch
                                          DateTime deadline)
         {
             // Scan the text on a line-by-line basis first.
-            Object[] a = diff_linesToChars(text1, text2);
+            object[] a = diff_linesToChars(text1, text2);
             text1 = (string)a[0];
             text2 = (string)a[1];
             List<string> linearray = (List<string>)a[2];
@@ -1124,9 +1124,9 @@ namespace Google.DiffMatchPatch
                     int commonOffset = diff_commonSuffix(equality1, edit);
                     if (commonOffset > 0)
                     {
-                        string commonString = edit.Substring(edit.Length - commonOffset);
-                        equality1 = equality1.Substring(0, equality1.Length - commonOffset);
-                        edit = commonString + edit.Substring(0, edit.Length - commonOffset);
+                        string commonString = edit[^commonOffset..];
+                        equality1 = equality1[..^commonOffset];
+                        edit = commonString + edit[..^commonOffset];
                         equality2 = commonString + equality2;
                     }
 
@@ -1141,8 +1141,8 @@ namespace Google.DiffMatchPatch
                         && edit[0] == equality2[0])
                     {
                         equality1 += edit[0];
-                        edit = edit.Substring(1) + equality2[0];
-                        equality2 = equality2.Substring(1);
+                        edit = edit[1..] + equality2[0];
+                        equality2 = equality2[1..];
                         int score = diff_cleanupSemanticScore(equality1, edit) +
                             diff_cleanupSemanticScore(edit, equality2);
                         // The >= encourages trailing rather than leading whitespace on
@@ -1393,27 +1393,24 @@ namespace Google.DiffMatchPatch
                                           == Operation.EQUAL)
                                     {
                                         diffs[pointer - count_delete - count_insert - 1].text
-                                            += text_insert.Substring(0, commonlength);
+                                            += text_insert[..commonlength];
                                     }
                                     else
                                     {
                                         diffs.Insert(0, new Diff(Operation.EQUAL,
-                                            text_insert.Substring(0, commonlength)));
+                                            text_insert[..commonlength]));
                                         pointer++;
                                     }
-                                    text_insert = text_insert.Substring(commonlength);
-                                    text_delete = text_delete.Substring(commonlength);
+                                    text_insert = text_insert[commonlength..];
+                                    text_delete = text_delete[commonlength..];
                                 }
                                 // Factor out any common suffixies.
                                 commonlength = diff_commonSuffix(text_insert, text_delete);
                                 if (commonlength != 0)
                                 {
-                                    diffs[pointer].text = text_insert.Substring(text_insert.Length
-                                        - commonlength) + diffs[pointer].text;
-                                    text_insert = text_insert.Substring(0, text_insert.Length
-                                        - commonlength);
-                                    text_delete = text_delete.Substring(0, text_delete.Length
-                                        - commonlength);
+                                    diffs[pointer].text = text_insert[^commonlength..] + diffs[pointer].text;
+                                    text_insert = text_insert[..^commonlength];
+                                    text_delete = text_delete[..^commonlength];
                                 }
                             }
                             // Delete the offending records and add the merged ones.
@@ -1451,7 +1448,7 @@ namespace Google.DiffMatchPatch
                         break;
                 }
             }
-            if (diffs[diffs.Count - 1].text.Length == 0)
+            if (diffs[^1].text.Length == 0)
             {
                 diffs.RemoveAt(diffs.Count - 1);  // Remove the dummy entry at the end.
             }
@@ -1473,8 +1470,7 @@ namespace Google.DiffMatchPatch
                     {
                         // Shift the edit over the previous equality.
                         diffs[pointer].text = diffs[pointer - 1].text +
-                            diffs[pointer].text.Substring(0, diffs[pointer].text.Length -
-                                                          diffs[pointer - 1].text.Length);
+                            diffs[pointer].text[..^diffs[pointer - 1].text.Length];
                         diffs[pointer + 1].text = diffs[pointer - 1].text
                             + diffs[pointer + 1].text;
                         diffs.Splice(pointer - 1, 1);
@@ -1486,7 +1482,7 @@ namespace Google.DiffMatchPatch
                         // Shift the edit over the next equality.
                         diffs[pointer - 1].text += diffs[pointer + 1].text;
                         diffs[pointer].text =
-                            diffs[pointer].text.Substring(diffs[pointer + 1].text.Length)
+                            diffs[pointer].text[diffs[pointer + 1].text.Length..]
                             + diffs[pointer + 1].text;
                         diffs.Splice(pointer + 1, 1);
                         changes = true;
@@ -1676,7 +1672,7 @@ namespace Google.DiffMatchPatch
             if (delta.Length != 0)
             {
                 // Strip off trailing tab character.
-                delta = delta.Substring(0, delta.Length - 1);
+                delta = delta[..^1];
             }
             return delta;
         }
@@ -1704,7 +1700,7 @@ namespace Google.DiffMatchPatch
                 }
                 // Each token begins with a one character parameter which specifies the
                 // operation of this token (delete, insert, equality).
-                string param = token.Substring(1);
+                string param = token[1..];
                 switch (token[0])
                 {
                     case '+':
@@ -2138,7 +2134,7 @@ namespace Google.DiffMatchPatch
                         break;
                     case Operation.EQUAL:
                         if (aDiff.text.Length <= 2 * Patch_Margin
-                            && patch.diffs.Count() != 0 && aDiff != diffs.Last())
+                            && patch.diffs.Count != 0 && aDiff != diffs.Last())
                         {
                             // Small equality inside a patch.
                             patch.diffs.Add(aDiff);
@@ -2218,11 +2214,11 @@ namespace Google.DiffMatchPatch
          * @return Two element Object array, containing the new text and an array of
          *      bool values.
          */
-        public Object[] patch_apply(List<Patch> patches, string text)
+        public object[] patch_apply(List<Patch> patches, string text)
         {
             if (patches.Count == 0)
             {
-                return new Object[] { text, new bool[0] };
+                return new object[] { text, Array.Empty<bool>() };
             }
 
             // Deep copy the patches so that no changes are made to originals.
@@ -2250,11 +2246,11 @@ namespace Google.DiffMatchPatch
                     // patch_splitMax will only provide an oversized pattern
                     // in the case of a monster delete.
                     start_loc = match_main(text,
-                        text1.Substring(0, Match_MaxBits), expected_loc);
+                        text1[..Match_MaxBits], expected_loc);
                     if (start_loc != -1)
                     {
                         end_loc = match_main(text,
-                            text1.Substring(text1.Length - Match_MaxBits),
+                            text1[^Match_MaxBits..],
                             expected_loc + text1.Length - Match_MaxBits);
                         if (end_loc == -1 || start_loc >= end_loc)
                         {
@@ -2293,8 +2289,8 @@ namespace Google.DiffMatchPatch
                     if (text1 == text2)
                     {
                         // Perfect match, just shove the Replacement text in.
-                        text = text.Substring(0, start_loc) + diff_text2(aPatch.diffs)
-                            + text.Substring(start_loc + text1.Length);
+                        text = text[..start_loc] + diff_text2(aPatch.diffs)
+                            + text[(start_loc + text1.Length)..];
                     }
                     else
                     {
@@ -2342,7 +2338,7 @@ namespace Google.DiffMatchPatch
             // Strip the padding off.
             text = text.Substring(nullPadding.Length, text.Length
                 - 2 * nullPadding.Length);
-            return new Object[] { text, results };
+            return new object[] { text, results };
         }
 
         /**
@@ -2384,8 +2380,11 @@ namespace Google.DiffMatchPatch
                 // Grow first equality.
                 Diff firstDiff = diffs.First();
                 int extraLength = paddingLength - firstDiff.text.Length;
-                firstDiff.text = nullPadding.Substring(firstDiff.text.Length)
-                    + firstDiff.text;
+                firstDiff.text = string.Concat
+                                            (
+                                                nullPadding.AsSpan(firstDiff.text.Length)
+                                                , firstDiff.text
+                                            );
                 patch.start1 -= extraLength;
                 patch.start2 -= extraLength;
                 patch.length1 += extraLength;
@@ -2407,7 +2406,7 @@ namespace Google.DiffMatchPatch
                 // Grow last equality.
                 Diff lastDiff = diffs.Last();
                 int extraLength = paddingLength - lastDiff.text.Length;
-                lastDiff.text += nullPadding.Substring(0, extraLength);
+                lastDiff.text += nullPadding[..extraLength];
                 patch.length1 += extraLength;
                 patch.length2 += extraLength;
             }
@@ -2439,7 +2438,7 @@ namespace Google.DiffMatchPatch
                 while (bigpatch.diffs.Count != 0)
                 {
                     // Create one of several smaller patches.
-                    Patch patch = new Patch();
+                    Patch patch = new ();
                     bool empty = true;
                     patch.start1 = start1 - precontext.Length;
                     patch.start2 = start2 - precontext.Length;
@@ -2476,8 +2475,8 @@ namespace Google.DiffMatchPatch
                         else
                         {
                             // Deletion or equality.  Only take as much as we can stomach.
-                            diff_text = diff_text.Substring(0, Math.Min(diff_text.Length,
-                                patch_size - patch.length1 - Patch_Margin));
+                            diff_text = diff_text[..Math.Min(diff_text.Length,
+                                patch_size - patch.length1 - Patch_Margin)];
                             patch.length1 += diff_text.Length;
                             start1 += diff_text.Length;
                             if (diff_type == Operation.EQUAL)
@@ -2497,21 +2496,21 @@ namespace Google.DiffMatchPatch
                             else
                             {
                                 bigpatch.diffs[0].text =
-                                    bigpatch.diffs[0].text.Substring(diff_text.Length);
+                                    bigpatch.diffs[0].text[diff_text.Length..];
                             }
                         }
                     }
                     // Compute the head context for the next patch.
                     precontext = diff_text2(patch.diffs);
-                    precontext = precontext.Substring(Math.Max(0,
-                        precontext.Length - Patch_Margin));
+                    precontext = precontext[Math.Max(0,
+                        precontext.Length - Patch_Margin)..];
 
                     string postcontext;//= null!;
                     // Append the end context for this patch.
                     if (diff_text1(bigpatch.diffs).Length > Patch_Margin)
                     {
                         postcontext = diff_text1(bigpatch.diffs)
-                            .Substring(0, Patch_Margin);
+                                            [..Patch_Margin];
                     }
                     else
                     {
@@ -2523,10 +2522,10 @@ namespace Google.DiffMatchPatch
                         patch.length1 += postcontext.Length;
                         patch.length2 += postcontext.Length;
                         if (patch.diffs.Count != 0
-                            && patch.diffs[patch.diffs.Count - 1].operation
+                            && patch.diffs[^1].operation
                             == Operation.EQUAL)
                         {
-                            patch.diffs[patch.diffs.Count - 1].text += postcontext;
+                            patch.diffs[^1].text += postcontext;
                         }
                         else
                         {
@@ -2565,7 +2564,7 @@ namespace Google.DiffMatchPatch
          */
         public List<Patch> patch_fromText(string textline)
         {
-            List<Patch> patches = new List<Patch>();
+            List<Patch> patches = new ();
             if (textline.Length == 0)
             {
                 return patches;
@@ -2574,7 +2573,7 @@ namespace Google.DiffMatchPatch
             int textPointer = 0;
             Patch patch;
             Regex patchHeader
-                = new Regex("^@@ -(\\d+),?(\\d*) \\+(\\d+),?(\\d*) @@$");
+                = new ("^@@ -(\\d+),?(\\d*) \\+(\\d+),?(\\d*) @@$");
             Match m;
             char sign;
             string line;
@@ -2633,7 +2632,7 @@ namespace Google.DiffMatchPatch
                         textPointer++;
                         continue;
                     }
-                    line = text[textPointer].Substring(1);
+                    line = text[textPointer][1..];
                     line = line.Replace("+", "%2b");
                     line = HttpUtility.UrlDecode(line);
                     if (sign == '-')
@@ -2678,15 +2677,28 @@ namespace Google.DiffMatchPatch
         public static string encodeURI(string str)
         {
             // C# is overzealous in the replacements.  Walk back on a few.
-            return new StringBuilder(HttpUtility.UrlEncode(str))
-                .Replace('+', ' ').Replace("%20", " ").Replace("%21", "!")
-                .Replace("%2a", "*").Replace("%27", "'").Replace("%28", "(")
-                .Replace("%29", ")").Replace("%3b", ";").Replace("%2f", "/")
-                .Replace("%3f", "?").Replace("%3a", ":").Replace("%40", "@")
-                .Replace("%26", "&").Replace("%3d", "=").Replace("%2b", "+")
-                .Replace("%24", "$").Replace("%2c", ",").Replace("%23", "#")
-                .Replace("%7e", "~")
-                .ToString();
+            return new StringBuilder
+                            (HttpUtility.UrlEncode(str))
+                                            .Replace('+', ' ')
+                                            .Replace("%20", " ")
+                                            .Replace("%21", "!")
+                                            .Replace("%2a", "*")
+                                            .Replace("%27", "'")
+                                            .Replace("%28", "(")
+                                            .Replace("%29", ")")
+                                            .Replace("%3b", ";")
+                                            .Replace("%2f", "/")
+                                            .Replace("%3f", "?")
+                                            .Replace("%3a", ":")
+                                            .Replace("%40", "@")
+                                            .Replace("%26", "&")
+                                            .Replace("%3d", "=")
+                                            .Replace("%2b", "+")
+                                            .Replace("%24", "$")
+                                            .Replace("%2c", ",")
+                                            .Replace("%23", "#")
+                                            .Replace("%7e", "~")
+                                            .ToString();
         }
     }
 }
