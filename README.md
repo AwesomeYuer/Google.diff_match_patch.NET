@@ -1,1 +1,1 @@
-# Google.diff_match_patch.NET
+# diff_match_patch.Google
