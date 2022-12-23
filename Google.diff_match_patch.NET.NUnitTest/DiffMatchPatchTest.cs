@@ -28,60 +28,62 @@ namespace nicTest
   public class diff_match_patchTest : diff_match_patch {
     [Test()]
     public void diff_commonPrefixTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       // Detect any common suffix.
       // Null case.
-      Assert.AreEqual(0, dmp.diff_commonPrefix("abc", "xyz"));
+      Assert.That(dmp.diff_commonPrefix("abc", "xyz"), Is.EqualTo(0));
 
       // Non-null case.
-      Assert.AreEqual(4, dmp.diff_commonPrefix("1234abcdef", "1234xyz"));
+      Assert.That(dmp.diff_commonPrefix("1234abcdef", "1234xyz"), Is.EqualTo(4));
 
       // Whole case.
-      Assert.AreEqual(4, dmp.diff_commonPrefix("1234", "1234xyz"));
+      Assert.That(dmp.diff_commonPrefix("1234", "1234xyz"), Is.EqualTo(4));
     }
 
     [Test()]
     public void diff_commonSuffixTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       // Detect any common suffix.
       // Null case.
-      Assert.AreEqual(0, dmp.diff_commonSuffix("abc", "xyz"));
+      Assert.That(dmp.diff_commonSuffix("abc", "xyz"), Is.EqualTo(0));
 
       // Non-null case.
-      Assert.AreEqual(4, dmp.diff_commonSuffix("abcdef1234", "xyz1234"));
+      Assert.That(dmp.diff_commonSuffix("abcdef1234", "xyz1234"), Is.EqualTo(4));
 
       // Whole case.
-      Assert.AreEqual(4, dmp.diff_commonSuffix("1234", "xyz1234"));
+      Assert.That(dmp.diff_commonSuffix("1234", "xyz1234"), Is.EqualTo(4));
     }
 
     [Test()]
     public void diff_commonOverlapTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       // Detect any suffix/prefix overlap.
       // Null case.
-      Assert.AreEqual(0, dmp.diff_commonOverlap("", "abcd"));
+      Assert.That(dmp.diff_commonOverlap("", "abcd"), Is.EqualTo(0));
 
       // Whole case.
-      Assert.AreEqual(3, dmp.diff_commonOverlap("abc", "abcd"));
+      Assert.That(dmp.diff_commonOverlap("abc", "abcd"), Is.EqualTo(3));
 
       // No overlap.
-      Assert.AreEqual(0, dmp.diff_commonOverlap("123456", "abcd"));
+      Assert.That(dmp.diff_commonOverlap("123456", "abcd"), Is.EqualTo(0));
 
       // Overlap.
-      Assert.AreEqual(3, dmp.diff_commonOverlap("123456xxx", "xxxabcd"));
+      Assert.That(dmp.diff_commonOverlap("123456xxx", "xxxabcd"), Is.EqualTo(3));
 
       // Unicode.
       // Some overly clever languages (C#) may treat ligatures as equal to their
       // component letters.  E.g. U+FB01 == 'fi'
-      Assert.AreEqual(0, dmp.diff_commonOverlap("fi", "\ufb01i"));
+      Assert.That(dmp.diff_commonOverlap("fi", "\ufb01i"), Is.EqualTo(0));
     }
 
     [Test()]
     public void diff_halfmatchTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
-      dmp.Diff_Timeout = 1;
-      // No match.
-      Assert.IsNull(dmp.diff_halfMatch("1234567890", "abcdef"));
+            diff_match_patchTest dmp = new()
+            {
+                Diff_Timeout = 1
+            };
+            // No match.
+            Assert.IsNull(dmp.diff_halfMatch("1234567890", "abcdef"));
 
       Assert.IsNull(dmp.diff_halfMatch("12345", "23"));
 
@@ -112,15 +114,17 @@ namespace nicTest
 
     [Test()]
     public void diff_linesToCharsTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
-      // Convert lines down to characters.
-      List<string> tmpVector = new List<string>();
-      tmpVector.Add("");
-      tmpVector.Add("alpha\n");
-      tmpVector.Add("beta\n");
-      Object[] result = dmp.diff_linesToChars("alpha\nbeta\nalpha\n", "beta\nalpha\nbeta\n");
-      Assert.AreEqual("\u0001\u0002\u0001", result[0]);
-      Assert.AreEqual("\u0002\u0001\u0002", result[1]);
+      diff_match_patchTest dmp = new ();
+            // Convert lines down to characters.
+            List<string> tmpVector = new()
+            {
+                "",
+                "alpha\n",
+                "beta\n"
+            };
+            object[] result = dmp.diff_linesToChars("alpha\nbeta\nalpha\n", "beta\nalpha\nbeta\n");
+      Assert.That(result[0], Is.EqualTo("\u0001\u0002\u0001"));
+      Assert.That(result[1], Is.EqualTo("\u0002\u0001\u0002"));
       CollectionAssert.AreEqual(tmpVector, (List<string>)result[2]);
 
       tmpVector.Clear();
@@ -129,8 +133,8 @@ namespace nicTest
       tmpVector.Add("beta\r\n");
       tmpVector.Add("\r\n");
       result = dmp.diff_linesToChars("", "alpha\r\nbeta\r\n\r\n\r\n");
-      Assert.AreEqual("", result[0]);
-      Assert.AreEqual("\u0001\u0002\u0003\u0003", result[1]);
+      Assert.That(result[0], Is.EqualTo(""));
+      Assert.That(result[1], Is.EqualTo("\u0001\u0002\u0003\u0003"));
       CollectionAssert.AreEqual(tmpVector, (List<string>)result[2]);
 
       tmpVector.Clear();
@@ -138,61 +142,66 @@ namespace nicTest
       tmpVector.Add("a");
       tmpVector.Add("b");
       result = dmp.diff_linesToChars("a", "b");
-      Assert.AreEqual("\u0001", result[0]);
-      Assert.AreEqual("\u0002", result[1]);
+      Assert.That(result[0], Is.EqualTo("\u0001"));
+      Assert.That(result[1], Is.EqualTo("\u0002"));
       CollectionAssert.AreEqual(tmpVector, (List<string>)result[2]);
 
       // More than 256 to reveal any 8-bit limitations.
       int n = 300;
       tmpVector.Clear();
-      StringBuilder lineList = new StringBuilder();
-      StringBuilder charList = new StringBuilder();
+      StringBuilder lineList = new ();
+      StringBuilder charList = new ();
       for (int x = 1; x < n + 1; x++) {
         tmpVector.Add(x + "\n");
         lineList.Append(x + "\n");
         charList.Append(Convert.ToChar(x));
       }
-      Assert.AreEqual(n, tmpVector.Count);
+      Assert.That(tmpVector.Count, Is.EqualTo(n));
       string lines = lineList.ToString();
       string chars = charList.ToString();
-      Assert.AreEqual(n, chars.Length);
+      Assert.That(chars.Length, Is.EqualTo(n));
       tmpVector.Insert(0, "");
       result = dmp.diff_linesToChars(lines, "");
-      Assert.AreEqual(chars, result[0]);
-      Assert.AreEqual("", result[1]);
+      Assert.That(result[0], Is.EqualTo(chars));
+      Assert.That(result[1], Is.EqualTo(""));
       CollectionAssert.AreEqual(tmpVector, (List<string>)result[2]);
     }
 
     [Test()]
-    public void diff_charsToLinesTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
-      // Convert chars up to lines.
-      List<Diff> diffs = new List<Diff> {
-          new Diff(Operation.EQUAL, "\u0001\u0002\u0001"),
-          new Diff(Operation.INSERT, "\u0002\u0001\u0002")};
-      List<string> tmpVector = new List<string>();
-      tmpVector.Add("");
-      tmpVector.Add("alpha\n");
-      tmpVector.Add("beta\n");
-      dmp.diff_charsToLines(diffs, tmpVector);
-      CollectionAssert.AreEqual(new List<Diff> {
+    public void diff_charsToLinesTest()
+    {
+        diff_match_patchTest dmp = new ();
+        // Convert chars up to lines.
+        List<Diff> diffs = new()
+        {
+            new Diff(Operation.EQUAL, "\u0001\u0002\u0001"),
+            new Diff(Operation.INSERT, "\u0002\u0001\u0002")
+        };
+        List<string> tmpVector = new ()
+        {
+            "",
+            "alpha\n",
+            "beta\n"
+        };
+        dmp.diff_charsToLines(diffs, tmpVector);
+        CollectionAssert.AreEqual(new List<Diff> {
           new Diff(Operation.EQUAL, "alpha\nbeta\nalpha\n"),
           new Diff(Operation.INSERT, "beta\nalpha\nbeta\n")}, diffs);
 
       // More than 256 to reveal any 8-bit limitations.
       int n = 300;
       tmpVector.Clear();
-      StringBuilder lineList = new StringBuilder();
-      StringBuilder charList = new StringBuilder();
+      StringBuilder lineList = new ();
+      StringBuilder charList = new ();
       for (int x = 1; x < n + 1; x++) {
         tmpVector.Add(x + "\n");
         lineList.Append(x + "\n");
         charList.Append(Convert.ToChar (x));
       }
-      Assert.AreEqual(n, tmpVector.Count);
+      Assert.That(tmpVector.Count, Is.EqualTo(n));
       string lines = lineList.ToString();
       string chars = charList.ToString();
-      Assert.AreEqual(n, chars.Length);
+      Assert.That(chars.Length, Is.EqualTo(n));
       tmpVector.Insert(0, "");
       diffs = new List<Diff> {new Diff(Operation.DELETE, chars)};
       dmp.diff_charsToLines(diffs, tmpVector);
@@ -202,10 +211,10 @@ namespace nicTest
 
     [Test()]
     public void diff_cleanupMergeTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       // Cleanup a messy diff.
       // Null case.
-      List<Diff> diffs = new List<Diff>();
+      List<Diff> diffs = new ();
       dmp.diff_cleanupMerge(diffs);
       CollectionAssert.AreEqual(new List<Diff>(), diffs);
 
@@ -267,10 +276,10 @@ namespace nicTest
 
     [Test()]
     public void diff_cleanupSemanticLosslessTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       // Slide diffs to match logical boundaries.
       // Null case.
-      List<Diff> diffs = new List<Diff>();
+      List<Diff> diffs = new ();
       dmp.diff_cleanupSemanticLossless(diffs);
       CollectionAssert.AreEqual(new List<Diff>(), diffs);
 
@@ -353,10 +362,10 @@ namespace nicTest
 
     [Test()]
     public void diff_cleanupSemanticTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       // Cleanup semantically trivial equalities.
       // Null case.
-      List<Diff> diffs = new List<Diff>();
+      List<Diff> diffs = new ();
       dmp.diff_cleanupSemantic(diffs);
       CollectionAssert.AreEqual(new List<Diff>(), diffs);
 
@@ -484,11 +493,13 @@ namespace nicTest
 
     [Test()]
     public void diff_cleanupEfficiencyTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
-      // Cleanup operationally trivial equalities.
-      dmp.Diff_EditCost = 4;
-      // Null case.
-      List<Diff> diffs = new List<Diff> ();
+            diff_match_patchTest dmp = new()
+            {
+                // Cleanup operationally trivial equalities.
+                Diff_EditCost = 4
+            };
+            // Null case.
+            List<Diff> diffs = new ();
       dmp.diff_cleanupEfficiency(diffs);
       CollectionAssert.AreEqual(new List<Diff>(), diffs);
 
@@ -561,21 +572,22 @@ namespace nicTest
 
     [Test()]
     public void diff_prettyHtmlTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       // Pretty print.
-      List<Diff> diffs = new List<Diff> {
+      List<Diff> diffs = new()
+      {
           new Diff(Operation.EQUAL, "a\n"),
           new Diff(Operation.DELETE, "<B>b</B>"),
           new Diff(Operation.INSERT, "c&d")};
-      Assert.AreEqual("<span>a&para;<br></span><del style=\"background:#ffe6e6;\">&lt;B&gt;b&lt;/B&gt;</del><ins style=\"background:#e6ffe6;\">c&amp;d</ins>",
-          dmp.diff_prettyHtml(diffs));
+      Assert.That(dmp.diff_prettyHtml(diffs), Is.EqualTo("<span>a&para;<br></span><del style=\"background:#ffe6e6;\">&lt;B&gt;b&lt;/B&gt;</del><ins style=\"background:#e6ffe6;\">c&amp;d</ins>"));
     }
 
     [Test()]
     public void diff_textTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       // Compute the source and destination texts.
-      List<Diff> diffs = new List<Diff> {
+      List<Diff> diffs = new ()
+      {
           new Diff(Operation.EQUAL, "jump"),
           new Diff(Operation.DELETE, "s"),
           new Diff(Operation.INSERT, "ed"),
@@ -583,29 +595,32 @@ namespace nicTest
           new Diff(Operation.DELETE, "the"),
           new Diff(Operation.INSERT, "a"),
           new Diff(Operation.EQUAL, " lazy")};
-      Assert.AreEqual("jumps over the lazy", dmp.diff_text1(diffs));
+      Assert.That(dmp.diff_text1(diffs), Is.EqualTo("jumps over the lazy"));
 
-      Assert.AreEqual("jumped over a lazy", dmp.diff_text2(diffs));
+      Assert.That(dmp.diff_text2(diffs), Is.EqualTo("jumped over a lazy"));
     }
 
     [Test()]
     public void diff_deltaTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       // Convert a diff into delta string.
-      List<Diff> diffs = new List<Diff> {
-          new Diff(Operation.EQUAL, "jump"),
-          new Diff(Operation.DELETE, "s"),
-          new Diff(Operation.INSERT, "ed"),
-          new Diff(Operation.EQUAL, " over "),
-          new Diff(Operation.DELETE, "the"),
-          new Diff(Operation.INSERT, "a"),
-          new Diff(Operation.EQUAL, " lazy"),
-          new Diff(Operation.INSERT, "old dog")};
+      List<Diff> diffs = new()
+      {
+          new Diff(Operation.EQUAL, "jump")
+          , new Diff(Operation.DELETE, "s")
+          , new Diff(Operation.INSERT, "ed")
+          , new Diff(Operation.EQUAL, " over ")
+          , new Diff(Operation.DELETE, "the")
+          , new Diff(Operation.INSERT, "a")
+          , new Diff(Operation.EQUAL, " lazy")
+          , new Diff(Operation.INSERT, "old dog")
+      };
+
       string text1 = dmp.diff_text1(diffs);
-      Assert.AreEqual("jumps over the lazy", text1);
+      Assert.That(text1, Is.EqualTo("jumps over the lazy"));
 
       string delta = dmp.diff_toDelta(diffs);
-      Assert.AreEqual("=4\t-1\t+ed\t=6\t-3\t+a\t=5\t+old dog", delta);
+      Assert.That(delta, Is.EqualTo("=4\t-1\t+ed\t=6\t-3\t+a\t=5\t+old dog"));
 
       // Convert delta string into a diff.
       CollectionAssert.AreEqual(diffs, dmp.diff_fromDelta(text1, delta));
@@ -620,7 +635,7 @@ namespace nicTest
 
       // Generates error (19 > 18).
       try {
-        dmp.diff_fromDelta(text1.Substring(1), delta);
+        dmp.diff_fromDelta(text1[1..], delta);
         Assert.Fail("diff_fromDelta: Too short.");
       } catch (ArgumentException) {
         // Exception expected.
@@ -643,11 +658,11 @@ namespace nicTest
           new Diff(Operation.DELETE, "\u0681 " + one + " \n ^"),
           new Diff(Operation.INSERT, "\u0682 " + two + " \\ |")};
       text1 = dmp.diff_text1(diffs);
-      Assert.AreEqual("\u0680 " + zero + " \t %\u0681 " + one + " \n ^", text1);
+      Assert.That(text1, Is.EqualTo("\u0680 " + zero + " \t %\u0681 " + one + " \n ^"));
 
       delta = dmp.diff_toDelta(diffs);
       // Lowercase, due to UrlEncode uses lower.
-      Assert.AreEqual("=7\t-7\t+%da%82 %02 %5c %7c", delta, "diff_toDelta: Unicode.");
+      Assert.That(delta, Is.EqualTo("=7\t-7\t+%da%82 %02 %5c %7c"), "diff_toDelta: Unicode.");
 
       CollectionAssert.AreEqual(diffs, dmp.diff_fromDelta(text1, delta), "diff_fromDelta: Unicode.");
 
@@ -655,64 +670,78 @@ namespace nicTest
       diffs = new List<Diff> {
           new Diff(Operation.INSERT, "A-Z a-z 0-9 - _ . ! ~ * ' ( ) ; / ? : @ & = + $ , # ")};
       string text2 = dmp.diff_text2(diffs);
-      Assert.AreEqual("A-Z a-z 0-9 - _ . ! ~ * \' ( ) ; / ? : @ & = + $ , # ", text2, "diff_text2: Unchanged characters.");
+      Assert.That(text2, Is.EqualTo("A-Z a-z 0-9 - _ . ! ~ * \' ( ) ; / ? : @ & = + $ , # "), "diff_text2: Unchanged characters.");
 
       delta = dmp.diff_toDelta(diffs);
-      Assert.AreEqual("+A-Z a-z 0-9 - _ . ! ~ * \' ( ) ; / ? : @ & = + $ , # ", delta, "diff_toDelta: Unchanged characters.");
+      Assert.That(delta, Is.EqualTo("+A-Z a-z 0-9 - _ . ! ~ * \' ( ) ; / ? : @ & = + $ , # "), "diff_toDelta: Unchanged characters.");
 
       // Convert delta string into a diff.
       CollectionAssert.AreEqual(diffs, dmp.diff_fromDelta("", delta), "diff_fromDelta: Unchanged characters.");
     }
 
     [Test()]
-    public void diff_xIndexTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+    public void diff_xIndexTest()
+    {
+      diff_match_patchTest dmp = new ();
       // Translate a location in text1 to text2.
-      List<Diff> diffs = new List<Diff> {
+      List<Diff> diffs = new()
+      {
           new Diff(Operation.DELETE, "a"),
           new Diff(Operation.INSERT, "1234"),
-          new Diff(Operation.EQUAL, "xyz")};
-      Assert.AreEqual(5, dmp.diff_xIndex(diffs, 2), "diff_xIndex: Translation on equality.");
+          new Diff(Operation.EQUAL, "xyz")
+      };
+      Assert.That(dmp.diff_xIndex(diffs, 2), Is.EqualTo(5), "diff_xIndex: Translation on equality.");
 
-      diffs = new List<Diff> {
+      diffs = new List<Diff>
+      {
           new Diff(Operation.EQUAL, "a"),
           new Diff(Operation.DELETE, "1234"),
-          new Diff(Operation.EQUAL, "xyz")};
-      Assert.AreEqual(1, dmp.diff_xIndex(diffs, 3), "diff_xIndex: Translation on deletion.");
+          new Diff(Operation.EQUAL, "xyz")
+      };
+      Assert.That(dmp.diff_xIndex(diffs, 3), Is.EqualTo(1), "diff_xIndex: Translation on deletion.");
     }
 
     [Test()]
     public void diff_levenshteinTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
-      List<Diff> diffs = new List<Diff> {
-          new Diff(Operation.DELETE, "abc"),
-          new Diff(Operation.INSERT, "1234"),
-          new Diff(Operation.EQUAL, "xyz")};
-      Assert.AreEqual(4, dmp.diff_levenshtein(diffs), "diff_levenshtein: Levenshtein with trailing equality.");
+      diff_match_patchTest dmp = new ();
+      List<Diff> diffs = new()
+      {
+          new Diff(Operation.DELETE, "abc")
+          , new Diff(Operation.INSERT, "1234")
+          , new Diff(Operation.EQUAL, "xyz")
+      };
+      Assert.That(dmp.diff_levenshtein(diffs), Is.EqualTo(4), "diff_levenshtein: Levenshtein with trailing equality.");
 
       diffs = new List<Diff> {
           new Diff(Operation.EQUAL, "xyz"),
           new Diff(Operation.DELETE, "abc"),
           new Diff(Operation.INSERT, "1234")};
-      Assert.AreEqual(4, dmp.diff_levenshtein(diffs), "diff_levenshtein: Levenshtein with leading equality.");
+      Assert.That(dmp.diff_levenshtein(diffs), Is.EqualTo(4), "diff_levenshtein: Levenshtein with leading equality.");
 
       diffs = new List<Diff> {
           new Diff(Operation.DELETE, "abc"),
           new Diff(Operation.EQUAL, "xyz"),
           new Diff(Operation.INSERT, "1234")};
-      Assert.AreEqual(7, dmp.diff_levenshtein(diffs), "diff_levenshtein: Levenshtein with middle equality.");
+      Assert.That(dmp.diff_levenshtein(diffs), Is.EqualTo(7), "diff_levenshtein: Levenshtein with middle equality.");
     }
 
     [Test()]
     public void diff_bisectTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       // Normal.
       string a = "cat";
       string b = "map";
       // Since the resulting diff hasn't been normalized, it would be ok if
       // the insertion and deletion pairs are swapped.
       // If the order changes, tweak this test as required.
-      List<Diff> diffs = new List<Diff> {new Diff(Operation.DELETE, "c"), new Diff(Operation.INSERT, "m"), new Diff(Operation.EQUAL, "a"), new Diff(Operation.DELETE, "t"), new Diff(Operation.INSERT, "p")};
+      List<Diff> diffs = new()
+      {
+          new Diff(Operation.DELETE, "c")
+          , new Diff(Operation.INSERT, "m")
+          , new Diff(Operation.EQUAL, "a")
+          , new Diff(Operation.DELETE, "t")
+          , new Diff(Operation.INSERT, "p")
+      };
       CollectionAssert.AreEqual(diffs, dmp.diff_bisect(a, b, DateTime.MaxValue));
 
       // Timeout.
@@ -722,9 +751,9 @@ namespace nicTest
 
     [Test()]
     public void diff_mainTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       // Perform a trivial diff.
-      List<Diff> diffs = new List<Diff> {};
+      List<Diff> diffs = new () { };
       CollectionAssert.AreEqual(diffs, dmp.diff_main("", "", false), "diff_main: Null case.");
 
       diffs = new List<Diff> {new Diff(Operation.EQUAL, "abc")};
@@ -771,8 +800,8 @@ namespace nicTest
       string b = "I am the very model of a modern major general,\nI've information vegetable, animal, and mineral,\nI know the kings of England, and I quote the fights historical,\nFrom Marathon to Waterloo, in order categorical.\n";
       // Increase the text lengths by 1024 times to ensure a timeout.
       for (int x = 0; x < 10; x++) {
-        a = a + a;
-        b = b + b;
+        a += a;
+        b += b;
       }
       dmp.diff_main(a, b);
       dmp.Diff_Timeout = 0;
@@ -798,11 +827,15 @@ namespace nicTest
 
     [Test()]
     public void match_alphabetTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
-      // Initialise the bitmasks for Bitap.
-      Dictionary<char, int> bitmask = new Dictionary<char, int>();
-      bitmask.Add('a', 4); bitmask.Add('b', 2); bitmask.Add('c', 1);
-      CollectionAssert.AreEqual(bitmask, dmp.match_alphabet("abc"), "match_alphabet: Unique.");
+      diff_match_patchTest dmp = new ();
+            // Initialise the bitmasks for Bitap.
+            Dictionary<char, int> bitmask = new ()
+            {
+                { 'a', 4 },
+                { 'b', 2 },
+                { 'c', 1 }
+            };
+            CollectionAssert.AreEqual(bitmask, dmp.match_alphabet("abc"), "match_alphabet: Unique.");
 
       bitmask.Clear();
       bitmask.Add('a', 37); bitmask.Add('b', 18); bitmask.Add('c', 8);
@@ -811,70 +844,71 @@ namespace nicTest
 
     [Test()]
     public void match_bitapTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+            diff_match_patchTest dmp = new ()
+            {
+                // Bitap algorithm.
+                Match_Distance = 100,
+                Match_Threshold = 0.5f
+            };
+            Assert.That(dmp.match_bitap("abcdefghijk", "fgh", 5), Is.EqualTo(5), "match_bitap: Exact match #1.");
 
-      // Bitap algorithm.
-      dmp.Match_Distance = 100;
-      dmp.Match_Threshold = 0.5f;
-      Assert.AreEqual(5, dmp.match_bitap("abcdefghijk", "fgh", 5), "match_bitap: Exact match #1.");
+      Assert.That(dmp.match_bitap("abcdefghijk", "fgh", 0), Is.EqualTo(5), "match_bitap: Exact match #2.");
 
-      Assert.AreEqual(5, dmp.match_bitap("abcdefghijk", "fgh", 0), "match_bitap: Exact match #2.");
+      Assert.That(dmp.match_bitap("abcdefghijk", "efxhi", 0), Is.EqualTo(4), "match_bitap: Fuzzy match #1.");
 
-      Assert.AreEqual(4, dmp.match_bitap("abcdefghijk", "efxhi", 0), "match_bitap: Fuzzy match #1.");
+      Assert.That(dmp.match_bitap("abcdefghijk", "cdefxyhijk", 5), Is.EqualTo(2), "match_bitap: Fuzzy match #2.");
 
-      Assert.AreEqual(2, dmp.match_bitap("abcdefghijk", "cdefxyhijk", 5), "match_bitap: Fuzzy match #2.");
+      Assert.That(dmp.match_bitap("abcdefghijk", "bxy", 1), Is.EqualTo(-1), "match_bitap: Fuzzy match #3.");
 
-      Assert.AreEqual(-1, dmp.match_bitap("abcdefghijk", "bxy", 1), "match_bitap: Fuzzy match #3.");
+      Assert.That(dmp.match_bitap("123456789xx0", "3456789x0", 2), Is.EqualTo(2), "match_bitap: Overflow.");
 
-      Assert.AreEqual(2, dmp.match_bitap("123456789xx0", "3456789x0", 2), "match_bitap: Overflow.");
+      Assert.That(dmp.match_bitap("abcdef", "xxabc", 4), Is.EqualTo(0), "match_bitap: Before start match.");
 
-      Assert.AreEqual(0, dmp.match_bitap("abcdef", "xxabc", 4), "match_bitap: Before start match.");
+      Assert.That(dmp.match_bitap("abcdef", "defyy", 4), Is.EqualTo(3), "match_bitap: Beyond end match.");
 
-      Assert.AreEqual(3, dmp.match_bitap("abcdef", "defyy", 4), "match_bitap: Beyond end match.");
-
-      Assert.AreEqual(0, dmp.match_bitap("abcdef", "xabcdefy", 0), "match_bitap: Oversized pattern.");
+      Assert.That(dmp.match_bitap("abcdef", "xabcdefy", 0), Is.EqualTo(0), "match_bitap: Oversized pattern.");
 
       dmp.Match_Threshold = 0.4f;
-      Assert.AreEqual(4, dmp.match_bitap("abcdefghijk", "efxyhi", 1), "match_bitap: Threshold #1.");
+      Assert.That(dmp.match_bitap("abcdefghijk", "efxyhi", 1), Is.EqualTo(4), "match_bitap: Threshold #1.");
 
       dmp.Match_Threshold = 0.3f;
-      Assert.AreEqual(-1, dmp.match_bitap("abcdefghijk", "efxyhi", 1), "match_bitap: Threshold #2.");
+      Assert.That(dmp.match_bitap("abcdefghijk", "efxyhi", 1), Is.EqualTo(-1), "match_bitap: Threshold #2.");
 
       dmp.Match_Threshold = 0.0f;
-      Assert.AreEqual(1, dmp.match_bitap("abcdefghijk", "bcdef", 1), "match_bitap: Threshold #3.");
+      Assert.That(dmp.match_bitap("abcdefghijk", "bcdef", 1), Is.EqualTo(1), "match_bitap: Threshold #3.");
 
       dmp.Match_Threshold = 0.5f;
-      Assert.AreEqual(0, dmp.match_bitap("abcdexyzabcde", "abccde", 3), "match_bitap: Multiple select #1.");
+      Assert.That(dmp.match_bitap("abcdexyzabcde", "abccde", 3), Is.EqualTo(0), "match_bitap: Multiple select #1.");
 
-      Assert.AreEqual(8, dmp.match_bitap("abcdexyzabcde", "abccde", 5), "match_bitap: Multiple select #2.");
+      Assert.That(dmp.match_bitap("abcdexyzabcde", "abccde", 5), Is.EqualTo(8), "match_bitap: Multiple select #2.");
 
       dmp.Match_Distance = 10;  // Strict location.
-      Assert.AreEqual(-1, dmp.match_bitap("abcdefghijklmnopqrstuvwxyz", "abcdefg", 24), "match_bitap: Distance test #1.");
+      Assert.That(dmp.match_bitap("abcdefghijklmnopqrstuvwxyz", "abcdefg", 24), Is.EqualTo(-1), "match_bitap: Distance test #1.");
 
-      Assert.AreEqual(0, dmp.match_bitap("abcdefghijklmnopqrstuvwxyz", "abcdxxefg", 1), "match_bitap: Distance test #2.");
+      Assert.That(dmp.match_bitap("abcdefghijklmnopqrstuvwxyz", "abcdxxefg", 1), Is.EqualTo(0), "match_bitap: Distance test #2.");
 
       dmp.Match_Distance = 1000;  // Loose location.
-      Assert.AreEqual(0, dmp.match_bitap("abcdefghijklmnopqrstuvwxyz", "abcdefg", 24), "match_bitap: Distance test #3.");
+      Assert.That(dmp.match_bitap("abcdefghijklmnopqrstuvwxyz", "abcdefg", 24), Is.EqualTo(0), "match_bitap: Distance test #3.");
     }
 
     [Test()]
     public void match_mainTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       // Full match.
-      Assert.AreEqual(0, dmp.match_main("abcdef", "abcdef", 1000), "match_main: Equality.");
+      Assert.That(dmp.match_main("abcdef", "abcdef", 1000), Is.EqualTo(0), "match_main: Equality.");
 
-      Assert.AreEqual(-1, dmp.match_main("", "abcdef", 1), "match_main: Null text.");
+      Assert.That(dmp.match_main("", "abcdef", 1), Is.EqualTo(-1), "match_main: Null text.");
 
-      Assert.AreEqual(3, dmp.match_main("abcdef", "", 3), "match_main: Null pattern.");
+      Assert.That(dmp.match_main("abcdef", "", 3), Is.EqualTo(3), "match_main: Null pattern.");
 
-      Assert.AreEqual(3, dmp.match_main("abcdef", "de", 3), "match_main: Exact match.");
+      Assert.That(dmp.match_main("abcdef", "de", 3), Is.EqualTo(3), "match_main: Exact match.");
 
-      Assert.AreEqual(3, dmp.match_main("abcdef", "defy", 4), "match_main: Beyond end match.");
+      Assert.That(dmp.match_main("abcdef", "defy", 4), Is.EqualTo(3), "match_main: Beyond end match.");
 
-      Assert.AreEqual(0, dmp.match_main("abcdef", "abcdefy", 0), "match_main: Oversized pattern.");
+      Assert.That(dmp.match_main("abcdef", "abcdefy", 0), Is.EqualTo(0), "match_main: Oversized pattern.");
 
       dmp.Match_Threshold = 0.7f;
-      Assert.AreEqual(4, dmp.match_main("I am the very model of a modern major general.", " that berry ", 5), "match_main: Complex match.");
+      Assert.That(dmp.match_main("I am the very model of a modern major general.", " that berry ", 5), Is.EqualTo(4), "match_main: Complex match.");
       dmp.Match_Threshold = 0.5f;
 
       // Test null inputs -- not needed because nulls can't be passed in C#.
@@ -882,37 +916,41 @@ namespace nicTest
 
     [Test()]
     public void patch_patchObjTest() {
-      // Patch Object.
-      Patch p = new Patch();
-      p.start1 = 20;
-      p.start2 = 21;
-      p.length1 = 18;
-      p.length2 = 17;
-      p.diffs = new List<Diff> {
-          new Diff(Operation.EQUAL, "jump"),
-          new Diff(Operation.DELETE, "s"),
-          new Diff(Operation.INSERT, "ed"),
-          new Diff(Operation.EQUAL, " over "),
-          new Diff(Operation.DELETE, "the"),
-          new Diff(Operation.INSERT, "a"),
-          new Diff(Operation.EQUAL, "\nlaz")};
-      string strp = "@@ -21,18 +22,17 @@\n jump\n-s\n+ed\n  over \n-the\n+a\n %0alaz\n";
-      Assert.AreEqual(strp, p.ToString(), "Patch: toString.");
+            // Patch Object.
+            Patch p = new()
+            {
+                start1 = 20,
+                start2 = 21,
+                length1 = 18,
+                length2 = 17,
+                diffs = new List<Diff>
+                {
+                    new Diff(Operation.EQUAL, "jump"),
+                    new Diff(Operation.DELETE, "s"),
+                    new Diff(Operation.INSERT, "ed"),
+                    new Diff(Operation.EQUAL, " over "),
+                    new Diff(Operation.DELETE, "the"),
+                    new Diff(Operation.INSERT, "a"),
+                    new Diff(Operation.EQUAL, "\nlaz")
+                }
+            };
+            string strp = "@@ -21,18 +22,17 @@\n jump\n-s\n+ed\n  over \n-the\n+a\n %0alaz\n";
+      Assert.That(p.ToString(), Is.EqualTo(strp), "Patch: toString.");
     }
 
     [Test()]
     public void patch_fromTextTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       Assert.IsTrue(dmp.patch_fromText("").Count == 0, "patch_fromText: #0.");
 
       string strp = "@@ -21,18 +22,17 @@\n jump\n-s\n+ed\n  over \n-the\n+a\n %0alaz\n";
-      Assert.AreEqual(strp, dmp.patch_fromText(strp)[0].ToString(), "patch_fromText: #1.");
+      Assert.That(dmp.patch_fromText(strp)[0].ToString(), Is.EqualTo(strp), "patch_fromText: #1.");
 
-      Assert.AreEqual("@@ -1 +1 @@\n-a\n+b\n", dmp.patch_fromText("@@ -1 +1 @@\n-a\n+b\n")[0].ToString(), "patch_fromText: #2.");
+      Assert.That(dmp.patch_fromText("@@ -1 +1 @@\n-a\n+b\n")[0].ToString(), Is.EqualTo("@@ -1 +1 @@\n-a\n+b\n"), "patch_fromText: #2.");
 
-      Assert.AreEqual("@@ -1,3 +0,0 @@\n-abc\n", dmp.patch_fromText("@@ -1,3 +0,0 @@\n-abc\n") [0].ToString(), "patch_fromText: #3.");
+      Assert.That(dmp.patch_fromText("@@ -1,3 +0,0 @@\n-abc\n") [0].ToString(), Is.EqualTo("@@ -1,3 +0,0 @@\n-abc\n"), "patch_fromText: #3.");
 
-      Assert.AreEqual("@@ -0,0 +1,3 @@\n+abc\n", dmp.patch_fromText("@@ -0,0 +1,3 @@\n+abc\n") [0].ToString(), "patch_fromText: #4.");
+      Assert.That(dmp.patch_fromText("@@ -0,0 +1,3 @@\n+abc\n") [0].ToString(), Is.EqualTo("@@ -0,0 +1,3 @@\n+abc\n"), "patch_fromText: #4.");
 
       // Generates error.
       try {
@@ -925,73 +963,73 @@ namespace nicTest
 
     [Test()]
     public void patch_toTextTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       string strp = "@@ -21,18 +22,17 @@\n jump\n-s\n+ed\n  over \n-the\n+a\n  laz\n";
       List<Patch> patches;
       patches = dmp.patch_fromText(strp);
       string result = dmp.patch_toText(patches);
-      Assert.AreEqual(strp, result);
+      Assert.That(result, Is.EqualTo(strp));
 
       strp = "@@ -1,9 +1,9 @@\n-f\n+F\n oo+fooba\n@@ -7,9 +7,9 @@\n obar\n-,\n+.\n  tes\n";
       patches = dmp.patch_fromText(strp);
       result = dmp.patch_toText(patches);
-      Assert.AreEqual(strp, result);
+      Assert.That(result, Is.EqualTo(strp));
     }
 
     [Test()]
     public void patch_addContextTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
-      dmp.Patch_Margin = 4;
-      Patch p;
+            diff_match_patchTest dmp = new ()
+            {
+                Patch_Margin = 4
+            };
+            Patch p;
       p = dmp.patch_fromText("@@ -21,4 +21,10 @@\n-jump\n+somersault\n") [0];
       dmp.patch_addContext(p, "The quick brown fox jumps over the lazy dog.");
-      Assert.AreEqual("@@ -17,12 +17,18 @@\n fox \n-jump\n+somersault\n s ov\n", p.ToString(), "patch_addContext: Simple case.");
+      Assert.That(p.ToString(), Is.EqualTo("@@ -17,12 +17,18 @@\n fox \n-jump\n+somersault\n s ov\n"), "patch_addContext: Simple case.");
 
       p = dmp.patch_fromText("@@ -21,4 +21,10 @@\n-jump\n+somersault\n")[0];
       dmp.patch_addContext(p, "The quick brown fox jumps.");
-      Assert.AreEqual("@@ -17,10 +17,16 @@\n fox \n-jump\n+somersault\n s.\n", p.ToString(), "patch_addContext: Not enough trailing context.");
+      Assert.That(p.ToString(), Is.EqualTo("@@ -17,10 +17,16 @@\n fox \n-jump\n+somersault\n s.\n"), "patch_addContext: Not enough trailing context.");
 
       p = dmp.patch_fromText("@@ -3 +3,2 @@\n-e\n+at\n")[0];
       dmp.patch_addContext(p, "The quick brown fox jumps.");
-      Assert.AreEqual("@@ -1,7 +1,8 @@\n Th\n-e\n+at\n  qui\n", p.ToString(), "patch_addContext: Not enough leading context.");
+      Assert.That(p.ToString(), Is.EqualTo("@@ -1,7 +1,8 @@\n Th\n-e\n+at\n  qui\n"), "patch_addContext: Not enough leading context.");
 
       p = dmp.patch_fromText("@@ -3 +3,2 @@\n-e\n+at\n")[0];
       dmp.patch_addContext(p, "The quick brown fox jumps.  The quick brown fox crashes.");
-      Assert.AreEqual("@@ -1,27 +1,28 @@\n Th\n-e\n+at\n  quick brown fox jumps. \n", p.ToString(), "patch_addContext: Ambiguity.");
+      Assert.That(p.ToString(), Is.EqualTo("@@ -1,27 +1,28 @@\n Th\n-e\n+at\n  quick brown fox jumps. \n"), "patch_addContext: Ambiguity.");
     }
 
     [Test()]
     public void patch_makeTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       List<Patch> patches;
       patches = dmp.patch_make("", "");
-      Assert.AreEqual("", dmp.patch_toText(patches), "patch_make: Null case.");
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo(""), "patch_make: Null case.");
 
       string text1 = "The quick brown fox jumps over the lazy dog.";
       string text2 = "That quick brown fox jumped over a lazy dog.";
       string expectedPatch = "@@ -1,8 +1,7 @@\n Th\n-at\n+e\n  qui\n@@ -21,17 +21,18 @@\n jump\n-ed\n+s\n  over \n-a\n+the\n  laz\n";
       // The second patch must be "-21,17 +21,18", not "-22,17 +21,18" due to rolling context.
       patches = dmp.patch_make(text2, text1);
-      Assert.AreEqual(expectedPatch, dmp.patch_toText(patches), "patch_make: Text2+Text1 inputs.");
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo(expectedPatch), "patch_make: Text2+Text1 inputs.");
 
       expectedPatch = "@@ -1,11 +1,12 @@\n Th\n-e\n+at\n  quick b\n@@ -22,18 +22,17 @@\n jump\n-s\n+ed\n  over \n-the\n+a\n  laz\n";
       patches = dmp.patch_make(text1, text2);
-      Assert.AreEqual(expectedPatch, dmp.patch_toText(patches), "patch_make: Text1+Text2 inputs.");
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo(expectedPatch), "patch_make: Text1+Text2 inputs.");
 
       List<Diff> diffs = dmp.diff_main(text1, text2, false);
       patches = dmp.patch_make(diffs);
-      Assert.AreEqual(expectedPatch, dmp.patch_toText(patches), "patch_make: Diff input.");
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo(expectedPatch), "patch_make: Diff input.");
 
       patches = dmp.patch_make(text1, diffs);
-      Assert.AreEqual(expectedPatch, dmp.patch_toText(patches), "patch_make: Text1+Diff inputs.");
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo(expectedPatch), "patch_make: Text1+Diff inputs.");
 
       patches = dmp.patch_make(text1, text2, diffs);
-      Assert.AreEqual(expectedPatch, dmp.patch_toText(patches), "patch_make: Text1+Text2+Diff inputs (deprecated).");
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo(expectedPatch), "patch_make: Text1+Text2+Diff inputs (deprecated).");
 
       patches = dmp.patch_make("`1234567890-=[]\\;',./", "~!@#$%^&*()_+{}|:\"<>?");
-      Assert.AreEqual("@@ -1,21 +1,21 @@\n-%601234567890-=%5b%5d%5c;',./\n+~!@#$%25%5e&*()_+%7b%7d%7c:%22%3c%3e?\n",
-          dmp.patch_toText(patches),
-          "patch_toText: Character encoding.");
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo("@@ -1,21 +1,21 @@\n-%601234567890-=%5b%5d%5c;',./\n+~!@#$%25%5e&*()_+%7b%7d%7c:%22%3c%3e?\n"), "patch_toText: Character encoding.");
 
       diffs = new List<Diff> {
           new Diff(Operation.DELETE, "`1234567890-=[]\\;',./"),
@@ -1007,7 +1045,7 @@ namespace nicTest
       text2 = text1 + "123";
       expectedPatch = "@@ -573,28 +573,31 @@\n cdefabcdefabcdefabcdefabcdef\n+123\n";
       patches = dmp.patch_make(text1, text2);
-      Assert.AreEqual(expectedPatch, dmp.patch_toText(patches), "patch_make: Long string with repeats.");
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo(expectedPatch), "patch_make: Long string with repeats.");
 
       // Test null inputs -- not needed because nulls can't be passed in C#.
     }
@@ -1015,106 +1053,102 @@ namespace nicTest
     [Test()]
     public void patch_splitMaxTest() {
       // Assumes that Match_MaxBits is 32.
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       List<Patch> patches;
 
       patches = dmp.patch_make("abcdefghijklmnopqrstuvwxyz01234567890", "XabXcdXefXghXijXklXmnXopXqrXstXuvXwxXyzX01X23X45X67X89X0");
       dmp.patch_splitMax(patches);
-      Assert.AreEqual("@@ -1,32 +1,46 @@\n+X\n ab\n+X\n cd\n+X\n ef\n+X\n gh\n+X\n ij\n+X\n kl\n+X\n mn\n+X\n op\n+X\n qr\n+X\n st\n+X\n uv\n+X\n wx\n+X\n yz\n+X\n 012345\n@@ -25,13 +39,18 @@\n zX01\n+X\n 23\n+X\n 45\n+X\n 67\n+X\n 89\n+X\n 0\n", dmp.patch_toText(patches));
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo("@@ -1,32 +1,46 @@\n+X\n ab\n+X\n cd\n+X\n ef\n+X\n gh\n+X\n ij\n+X\n kl\n+X\n mn\n+X\n op\n+X\n qr\n+X\n st\n+X\n uv\n+X\n wx\n+X\n yz\n+X\n 012345\n@@ -25,13 +39,18 @@\n zX01\n+X\n 23\n+X\n 45\n+X\n 67\n+X\n 89\n+X\n 0\n"));
 
       patches = dmp.patch_make("abcdef1234567890123456789012345678901234567890123456789012345678901234567890uvwxyz", "abcdefuvwxyz");
       string oldToText = dmp.patch_toText(patches);
       dmp.patch_splitMax(patches);
-      Assert.AreEqual(oldToText, dmp.patch_toText(patches));
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo(oldToText));
 
       patches = dmp.patch_make("1234567890123456789012345678901234567890123456789012345678901234567890", "abc");
       dmp.patch_splitMax(patches);
-      Assert.AreEqual("@@ -1,32 +1,4 @@\n-1234567890123456789012345678\n 9012\n@@ -29,32 +1,4 @@\n-9012345678901234567890123456\n 7890\n@@ -57,14 +1,3 @@\n-78901234567890\n+abc\n", dmp.patch_toText(patches));
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo("@@ -1,32 +1,4 @@\n-1234567890123456789012345678\n 9012\n@@ -29,32 +1,4 @@\n-9012345678901234567890123456\n 7890\n@@ -57,14 +1,3 @@\n-78901234567890\n+abc\n"));
 
       patches = dmp.patch_make("abcdefghij , h : 0 , t : 1 abcdefghij , h : 0 , t : 1 abcdefghij , h : 0 , t : 1", "abcdefghij , h : 1 , t : 1 abcdefghij , h : 1 , t : 1 abcdefghij , h : 0 , t : 1");
       dmp.patch_splitMax(patches);
-      Assert.AreEqual("@@ -2,32 +2,32 @@\n bcdefghij , h : \n-0\n+1\n  , t : 1 abcdef\n@@ -29,32 +29,32 @@\n bcdefghij , h : \n-0\n+1\n  , t : 1 abcdef\n", dmp.patch_toText(patches));
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo("@@ -2,32 +2,32 @@\n bcdefghij , h : \n-0\n+1\n  , t : 1 abcdef\n@@ -29,32 +29,32 @@\n bcdefghij , h : \n-0\n+1\n  , t : 1 abcdef\n"));
     }
 
     [Test()]
     public void patch_addPaddingTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
+      diff_match_patchTest dmp = new ();
       List<Patch> patches;
       patches = dmp.patch_make("", "test");
-      Assert.AreEqual("@@ -0,0 +1,4 @@\n+test\n",
-         dmp.patch_toText(patches),
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo("@@ -0,0 +1,4 @@\n+test\n"),
          "patch_addPadding: Both edges full.");
       dmp.patch_addPadding(patches);
-      Assert.AreEqual("@@ -1,8 +1,12 @@\n %01%02%03%04\n+test\n %01%02%03%04\n",
-          dmp.patch_toText(patches),
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo("@@ -1,8 +1,12 @@\n %01%02%03%04\n+test\n %01%02%03%04\n"),
           "patch_addPadding: Both edges full.");
 
       patches = dmp.patch_make("XY", "XtestY");
-      Assert.AreEqual("@@ -1,2 +1,6 @@\n X\n+test\n Y\n",
-          dmp.patch_toText(patches),
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo("@@ -1,2 +1,6 @@\n X\n+test\n Y\n"),
           "patch_addPadding: Both edges partial.");
       dmp.patch_addPadding(patches);
-      Assert.AreEqual("@@ -2,8 +2,12 @@\n %02%03%04X\n+test\n Y%01%02%03\n",
-          dmp.patch_toText(patches),
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo("@@ -2,8 +2,12 @@\n %02%03%04X\n+test\n Y%01%02%03\n"),
           "patch_addPadding: Both edges partial.");
 
       patches = dmp.patch_make("XXXXYYYY", "XXXXtestYYYY");
-      Assert.AreEqual("@@ -1,8 +1,12 @@\n XXXX\n+test\n YYYY\n",
-          dmp.patch_toText(patches),
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo("@@ -1,8 +1,12 @@\n XXXX\n+test\n YYYY\n"),
           "patch_addPadding: Both edges none.");
       dmp.patch_addPadding(patches);
-      Assert.AreEqual("@@ -5,8 +5,12 @@\n XXXX\n+test\n YYYY\n",
-         dmp.patch_toText(patches),
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo("@@ -5,8 +5,12 @@\n XXXX\n+test\n YYYY\n"),
          "patch_addPadding: Both edges none.");
     }
 
     [Test()]
     public void patch_applyTest() {
-      diff_match_patchTest dmp = new diff_match_patchTest();
-      dmp.Match_Distance = 1000;
-      dmp.Match_Threshold = 0.5f;
-      dmp.Patch_DeleteThreshold = 0.5f;
-      List<Patch> patches;
+            diff_match_patchTest dmp = new ()
+            {
+                Match_Distance = 1000,
+                Match_Threshold = 0.5f,
+                Patch_DeleteThreshold = 0.5f
+            };
+            List<Patch> patches;
       patches = dmp.patch_make("", "");
-      Object[] results = dmp.patch_apply(patches, "Hello world.");
+      object[] results = dmp.patch_apply(patches, "Hello world.");
       bool[] boolArray = (bool[])results[1];
       string resultStr = results[0] + "\t" + boolArray.Length;
-      Assert.AreEqual("Hello world.\t0", resultStr, "patch_apply: Null case.");
+      Assert.That(resultStr, Is.EqualTo("Hello world.\t0"), "patch_apply: Null case.");
 
       patches = dmp.patch_make("The quick brown fox jumps over the lazy dog.", "That quick brown fox jumped over a lazy dog.");
       results = dmp.patch_apply(patches, "The quick brown fox jumps over the lazy dog.");
       boolArray = (bool[])results[1];
       resultStr = results[0] + "\t" + boolArray[0] + "\t" + boolArray[1];
-      Assert.AreEqual("That quick brown fox jumped over a lazy dog.\tTrue\tTrue", resultStr, "patch_apply: Exact match.");
+      Assert.That(resultStr, Is.EqualTo("That quick brown fox jumped over a lazy dog.\tTrue\tTrue"), "patch_apply: Exact match.");
 
       results = dmp.patch_apply(patches, "The quick red rabbit jumps over the tired tiger.");
       boolArray = (bool[])results[1];
       resultStr = results[0] + "\t" + boolArray[0] + "\t" + boolArray[1];
-      Assert.AreEqual("That quick red rabbit jumped over a tired tiger.\tTrue\tTrue", resultStr, "patch_apply: Partial match.");
+      Assert.That(resultStr, Is.EqualTo("That quick red rabbit jumped over a tired tiger.\tTrue\tTrue"), "patch_apply: Partial match.");
 
       results = dmp.patch_apply(patches, "I am the very model of a modern major general.");
       boolArray = (bool[])results[1];
       resultStr = results[0] + "\t" + boolArray[0] + "\t" + boolArray[1];
-      Assert.AreEqual("I am the very model of a modern major general.\tFalse\tFalse", resultStr, "patch_apply: Failed match.");
+      Assert.That(resultStr, Is.EqualTo("I am the very model of a modern major general.\tFalse\tFalse"), "patch_apply: Failed match.");
 
       patches = dmp.patch_make("x1234567890123456789012345678901234567890123456789012345678901234567890y", "xabcy");
       results = dmp.patch_apply(patches, "x123456789012345678901234567890-----++++++++++-----123456789012345678901234567890y");
       boolArray = (bool[])results[1];
       resultStr = results[0] + "\t" + boolArray[0] + "\t" + boolArray[1];
-      Assert.AreEqual("xabcy\tTrue\tTrue", resultStr, "patch_apply: Big delete, small change.");
+      Assert.That(resultStr, Is.EqualTo("xabcy\tTrue\tTrue"), "patch_apply: Big delete, small change.");
 
       patches = dmp.patch_make("x1234567890123456789012345678901234567890123456789012345678901234567890y", "xabcy");
       results = dmp.patch_apply(patches, "x12345678901234567890---------------++++++++++---------------12345678901234567890y");
       boolArray = (bool[])results[1];
       resultStr = results[0] + "\t" + boolArray[0] + "\t" + boolArray[1];
-      Assert.AreEqual("xabc12345678901234567890---------------++++++++++---------------12345678901234567890y\tFalse\tTrue", resultStr, "patch_apply: Big delete, big change 1.");
+      Assert.That(resultStr, Is.EqualTo("xabc12345678901234567890---------------++++++++++---------------12345678901234567890y\tFalse\tTrue"), "patch_apply: Big delete, big change 1.");
 
       dmp.Patch_DeleteThreshold = 0.6f;
       patches = dmp.patch_make("x1234567890123456789012345678901234567890123456789012345678901234567890y", "xabcy");
       results = dmp.patch_apply(patches, "x12345678901234567890---------------++++++++++---------------12345678901234567890y");
       boolArray = (bool[])results[1];
       resultStr = results[0] + "\t" + boolArray[0] + "\t" + boolArray[1];
-      Assert.AreEqual("xabcy\tTrue\tTrue", resultStr, "patch_apply: Big delete, big change 2.");
+      Assert.That(resultStr, Is.EqualTo("xabcy\tTrue\tTrue"), "patch_apply: Big delete, big change 2.");
       dmp.Patch_DeleteThreshold = 0.5f;
 
       dmp.Match_Threshold = 0.0f;
@@ -1123,37 +1157,37 @@ namespace nicTest
       results = dmp.patch_apply(patches, "ABCDEFGHIJKLMNOPQRSTUVWXYZ--------------------1234567890");
       boolArray = (bool[])results[1];
       resultStr = results[0] + "\t" + boolArray[0] + "\t" + boolArray[1];
-      Assert.AreEqual("ABCDEFGHIJKLMNOPQRSTUVWXYZ--------------------1234567YYYYYYYYYY890\tFalse\tTrue", resultStr, "patch_apply: Compensate for failed patch.");
+      Assert.That(resultStr, Is.EqualTo("ABCDEFGHIJKLMNOPQRSTUVWXYZ--------------------1234567YYYYYYYYYY890\tFalse\tTrue"), "patch_apply: Compensate for failed patch.");
       dmp.Match_Threshold = 0.5f;
       dmp.Match_Distance = 1000;
 
       patches = dmp.patch_make("", "test");
       string patchStr = dmp.patch_toText(patches);
       dmp.patch_apply(patches, "");
-      Assert.AreEqual(patchStr, dmp.patch_toText(patches), "patch_apply: No side effects.");
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo(patchStr), "patch_apply: No side effects.");
 
       patches = dmp.patch_make("The quick brown fox jumps over the lazy dog.", "Woof");
       patchStr = dmp.patch_toText(patches);
       dmp.patch_apply(patches, "The quick brown fox jumps over the lazy dog.");
-      Assert.AreEqual(patchStr, dmp.patch_toText(patches), "patch_apply: No side effects with major delete.");
+      Assert.That(dmp.patch_toText(patches), Is.EqualTo(patchStr), "patch_apply: No side effects with major delete.");
 
       patches = dmp.patch_make("", "test");
       results = dmp.patch_apply(patches, "");
       boolArray = (bool[])results[1];
       resultStr = results[0] + "\t" + boolArray[0];
-      Assert.AreEqual("test\tTrue", resultStr, "patch_apply: Edge exact match.");
+      Assert.That(resultStr, Is.EqualTo("test\tTrue"), "patch_apply: Edge exact match.");
 
       patches = dmp.patch_make("XY", "XtestY");
       results = dmp.patch_apply(patches, "XY");
       boolArray = (bool[])results[1];
       resultStr = results[0] + "\t" + boolArray[0];
-      Assert.AreEqual("XtestY\tTrue", resultStr, "patch_apply: Near edge exact match.");
+      Assert.That(resultStr, Is.EqualTo("XtestY\tTrue"), "patch_apply: Near edge exact match.");
 
       patches = dmp.patch_make("y", "y123");
       results = dmp.patch_apply(patches, "x");
       boolArray = (bool[])results[1];
       resultStr = results[0] + "\t" + boolArray[0];
-      Assert.AreEqual("x123\tTrue", resultStr, "patch_apply: Edge partial match.");
+      Assert.That(resultStr, Is.EqualTo("x123\tTrue"), "patch_apply: Edge partial match.");
     }
 
     private static string[] diff_rebuildtexts(List<Diff> diffs) {
